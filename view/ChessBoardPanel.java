@@ -8,59 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-// public class ChessBoardPanel extends JPanel {
-//     private JButton[][] cells = new JButton[8][8];
-//     private List<Point> highlightedCells = new ArrayList<>();
-
-//     public ChessBoardPanel() {
-//         setLayout(new GridLayout(8, 8));
-//         initializeBoard();
-//     }
-
-//     private void initializeBoard() {
-//         for (int i = 0; i < 8; i++) {
-//             for (int j = 0; j < 8; j++) {
-//                 cells[i][j] = new JButton();
-//                 cells[i][j].setBackground((i + j) % 2 == 0 ? Color.WHITE : Color.GRAY);
-//                 add(cells[i][j]);
-//             }
-//         }
-//     }
-
-//     public JButton[][] getCells() {
-//         return cells;
-//     }
-
-//     public void updateBoard(Piece[][] boardArray) {
-//         // Очистка предыдущих выделений
-//         clearHighlights();
-//         for (int i = 0; i < 8; i++) {
-//             for (int j = 0; j < 8; j++) {
-//                 Piece piece = boardArray[i][j];
-//                 String imageName = piece.getColor() + "_" + piece.getClass().getSimpleName().toLowerCase() + ".png";
-// //              // cell.setIcon(ImageLoader.getImage(imageName));
-//                 cells[i][j].setIcon(piece != null ? ImageLoader.getImage(imageName) : null);
-//             }
-//         }
-//     }
-
-//     public void highlightCells(List<Point> points) {
-//         // Сохраняем выделенные клетки
-//         highlightedCells = points;
-//         for (Point p : points) {
-//             cells[p.x][p.y].setBackground(Color.GREEN); // Подсветка возможных ходов
-//         }
-//     }
-
-//     public void clearHighlights() {
-//         // Сбрасываем подсветку
-//         for (Point p : highlightedCells) {
-//             cells[p.x][p.y].setBackground((p.x + p.y) % 2 == 0 ? Color.WHITE : Color.GRAY);
-//         }
-//         highlightedCells.clear();
-//     }
-// }
-
 
 public class ChessBoardPanel extends JPanel {
     private JButton[][] cells = new JButton[8][8];

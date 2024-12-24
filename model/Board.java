@@ -390,8 +390,38 @@ public class Board implements Cloneable {
         return true;
     }
 
-    public void applyMove(Move move) {
+//    public void applyMove(Move move) {
+//
+//        if (move == null || move.movedPiece == null) {
+//            throw new IllegalArgumentException("Некорректный ход: move или movedPiece равно null");
+//        }
+//
+//        Piece piece = move.movedPiece; // Фигура, которая делает ход
+//
+//        piece.isInBounds(move.toX, move.toY);
+//
+//        // Если была съедена фигура, добавьте дополнительную логику, например:
+//        move.capturedPiece = getPieceAt(move.toX, move.toY);
+//
+//
+//        board[move.fromX][move.fromY] = null; // Очищаем исходную клетку
+//        board[move.toX][move.toY] = piece; // Ставим фигуру на новую клетку
+//
+//        // Обновляем позицию фигуры
+//        piece.setPosition(move.toX, move.toY);
+//
+//
+//        // Сохраняем ход в историю
+//        moveHistory.push(move);
+//
+//        currentPlayerColor = Objects.equals(piece.getColor(), "white") ? "black" : "white";
+//
+//        if (isKingInCheck(currentPlayerColor)) {
+//            System.out.println("Шах королю " + this.currentPlayerColor + "от фигуры " + piece.pieceInfo());
+//        }
+//    }
 
+    public void applyMove(Move move) {
         if (move == null || move.movedPiece == null) {
             throw new IllegalArgumentException("Некорректный ход: move или movedPiece равно null");
         }
@@ -403,13 +433,22 @@ public class Board implements Cloneable {
         // Если была съедена фигура, добавьте дополнительную логику, например:
         move.capturedPiece = getPieceAt(move.toX, move.toY);
 
-
         board[move.fromX][move.fromY] = null; // Очищаем исходную клетку
         board[move.toX][move.toY] = piece; // Ставим фигуру на новую клетку
 
         // Обновляем позицию фигуры
         piece.setPosition(move.toX, move.toY);
 
+        // Проверяем шахматную логику - превращение пешки в ферзя
+        if (piece instanceof Pawn) { // Если фигура - пешка
+            if ((piece.getColor().equals("white") && move.toX == 0) || // Пешка белых дошла до последнего ряда
+                    (piece.getColor().equals("black") && move.toX == 7)) { // Пешка чёрных дошла до последнего ряда
+
+                // Превращаем в ферзя, меняя объект пешки
+                board[move.toX][move.toY] = new Queen(piece.getColor(), move.toX, move.toY);
+                System.out.println("Пешка превращена в ферзя на позиции " + move.toX + "," + move.toY);
+            }
+        }
 
         // Сохраняем ход в историю
         moveHistory.push(move);
