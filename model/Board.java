@@ -460,6 +460,23 @@ public class Board implements Cloneable {
         }
     }
 
+    public List<Move> getAllValidMoves(String playerColor) {
+        List<Move> moves = new ArrayList<>();
+
+        // Итерируем по всем фигурам указанного цвета
+        for (int x = 0; x < 8; x++) {
+            for (int y = 0; y < 8; y++) {
+                Piece piece = getPieceAt(x, y);
+                if (piece != null && piece.getColor().equals(playerColor)) {
+                    // Добавляем все допустимые ходы для текущей фигуры
+                    moves.addAll(getValidMoves(x, y));
+                }
+            }
+        }
+
+        return moves; // Возвращаем список всех валидных ходов
+    }
+
 //    private Move parseNotationToMove(String notation) {
 //        String fromNotation = notation.substring(notation.indexOf("-")-2, notation.indexOf("-")); // Исходная клетка: "e2"
 //        String toNotation = notation.substring(notation.length() - 2); // Целевая клетка: "e4"

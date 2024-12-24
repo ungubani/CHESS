@@ -2,23 +2,41 @@ package model;
 
 import model.Board.Move;
 
+import java.util.List;
+import java.util.Random;
+
 public class ChessAI {
-    public Move calculateNextMove(Board board, String color) {
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                Piece piece = board.getPieceAt(i, j);
-                if (piece != null && piece.getColor().equals(color)) {
-                    for (int toX = 0; toX < 8; toX++) {
-                        for (int toY = 0; toY < 8; toY++) {
-                            if (piece.isValidMove(toX, toY, board)) {
-                                return new Move(piece, board.getPieceAt(toX, toY), i, j, toX, toY);
-                            }
-                        }
-                    }
-                }
-            }
+    private final Board board;
+
+    public ChessAI(Board board) {
+        this.board = board; // Получаем ссылку на текущую игровую доску
+    }
+
+    /**
+     * Определяет и выполняет лучший ход для компьютера.
+     */
+    public Move calculateBestMove() {
+        // Получаем все доступные ходы для чёрных (или любого цвета компьютера)
+        List<Move> validMoves = board.getAllValidMoves("black");
+        if (validMoves.isEmpty()) {
+            return null; // Нет доступных ходов
         }
-        return null; // Нет доступных ходов
+
+        // Простая стратегия: случайный выбор хода
+        Random random = new Random();
+        return validMoves.get(random.nextInt(validMoves.size()));
+    }
+
+    /**
+     * Выполняет ход компьютера на доске.
+     * @return true, если ход был успешно выполнен.
+     */
+    public boolean performMove() {
+        Move bestMove = calculateBestMove();
+        if (bestMove != null) {
+            return board.movePiece(bestMove.fromX, bestMove.fromY, bestMove.toX, bestMove.toY);
+        }
+        return false; // Если хода нет, например, шахматный мат
     }
 }
 
