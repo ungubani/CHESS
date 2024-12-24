@@ -5,8 +5,8 @@ import java.util.List;
 import model.Board.Move;
 
 public abstract class Piece implements Cloneable {
-    protected String color; // "white" или "black"
-    protected int x, y;     // Координаты фигуры
+    protected String color;
+    protected int x, y;
 
     public Piece(String color, int x, int y) {
         if (!isInBounds(x, y)) {

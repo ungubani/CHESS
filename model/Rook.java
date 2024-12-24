@@ -18,11 +18,9 @@ public class Rook extends Piece {
 
     @Override
     public boolean canAttack(int x, int y, Board board) {
-        // Ладья атакует только по прямой линии (горизонтали или вертикали)
         if (this.x == x || this.y == y) {
-            // Проверяем наличие преград
-            int stepX = Integer.compare(x, this.x); // -1, 0 или 1
-            int stepY = Integer.compare(y, this.y); // -1, 0 или 1
+            int stepX = Integer.compare(x, this.x);
+            int stepY = Integer.compare(y, this.y);
             int currentX = this.x + stepX;
             int currentY = this.y + stepY;
 
@@ -38,21 +36,6 @@ public class Rook extends Piece {
         return false;
     }
 
-    public static boolean isPathClear(Board board, int fromX, int fromY, int toX, int toY) {
-        int deltaX = Integer.signum(toX - fromX);
-        int deltaY = Integer.signum(toY - fromY);
-        int newX = fromX + deltaX, newY = fromY + deltaY;
-    
-        while (newX != toX || newY != toY) {
-            if (board.getPieceAt(newX, newY) != null) {
-                return false;
-            }
-            newX += deltaX;
-            newY += deltaY;
-        }
-        return true;
-    }
-
     @Override
     public List<Move> getPotentialMoves(int x, int y, Piece[][] board) {
         List<Move> moves = new ArrayList<>();
@@ -66,9 +49,9 @@ public class Rook extends Piece {
                     moves.add(new Move(this, null, x, y, newX, newY));
                 } else if (!board[newX][newY].getColor().equals(getColor())) {
                     moves.add(new Move(this, board[newX][newY], x, y, newX, newY));
-                    break; // Нельзя перепрыгивать через фигуры
+                    break;
                 } else {
-                    break; // Блокировка своей фигурой
+                    break;
                 }
                 newX += dir[0];
                 newY += dir[1];

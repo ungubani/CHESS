@@ -10,7 +10,6 @@ public class Queen extends Piece{
         super(color, x, y);
     }
 
-
     @Override
     protected String getType() {
         // TODO Auto-generated method stub
@@ -21,7 +20,6 @@ public class Queen extends Piece{
     public List<Move> getPotentialMoves(int x, int y, Piece[][] board) {
         List<Move> moves = new ArrayList<>();
 
-        // Комбинируем движения ладьи
         int[][] rookDirections = {
             {-1, 0}, 
         {0, -1},  {0, 1},
@@ -43,8 +41,12 @@ public class Queen extends Piece{
             }
         }
 
-        // Движения слона
-        int[][] bishopDirections = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+        int[][] bishopDirections = {
+                {-1, -1},   {-1, 1},
+
+                {1, -1},    {1, 1}
+        };
+
         for (int[] dir : bishopDirections) {
             int newX = x + dir[0], newY = y + dir[1];
             while (isInBounds(newX, newY)) {
@@ -69,9 +71,7 @@ public class Queen extends Piece{
         int deltaX = Math.abs(this.x - x);
         int deltaY = Math.abs(this.y - y);
 
-        // Ферзь может атаковать по диагонали (слон) или по прямой (ладья)
         if (deltaX == deltaY || this.x == x || this.y == y) {
-            // Проверяем наличие преград
             int stepX = Integer.compare(x, this.x); // -1, 0 или 1
             int stepY = Integer.compare(y, this.y); // -1, 0 или 1
             int currentX = this.x + stepX;
@@ -79,29 +79,13 @@ public class Queen extends Piece{
 
             while (currentX != x || currentY != y) {
                 if (board.getPieceAt(currentX, currentY) != null) {
-                    return false; // Преграда на пути
+                    return false;
                 }
                 currentX += stepX;
                 currentY += stepY;
             }
             return true;
         }
-        return false; // Если не диагональ и не прямая линия
-    }
-
-    // Check clear way for Bishop, Rook, Queen
-    public static boolean isPathClear(Board board, int fromX, int fromY, int toX, int toY) {
-        int deltaX = Integer.signum(toX - fromX);
-        int deltaY = Integer.signum(toY - fromY);
-        int newX = fromX + deltaX, newY = fromY + deltaY;
-    
-        while (newX != toX || newY != toY) {
-            if (board.getPieceAt(newX, newY) != null) {
-                return false;
-            }
-            newX += deltaX;
-            newY += deltaY;
-        }
-        return true;
+        return false;
     }
 }

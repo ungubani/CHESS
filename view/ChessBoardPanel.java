@@ -47,23 +47,21 @@ public class ChessBoardPanel extends JPanel {
         }
     }
 
-    // Подсветить ячейки
     public void highlightCells(List<Point> points) {
-        clearHighlights(); // Убираем старую подсветку
+        clearHighlights();
         for (Point point : points) {
             int x = point.x;
             int y = point.y;
-            cells[x][y].setBackground(Color.YELLOW); // Устанавливаем цвет подсветки
+            cells[x][y].setBackground(Color.YELLOW);
         }
-        highlightedCells = points; // Сохраняем подсвеченные ячейки
+        highlightedCells = points;
     }
 
-    // Очистить подсветку
     public void clearHighlights() {
         for (Point point : highlightedCells) {
             int x = point.x;
             int y = point.y;
-            cells[x][y].setBackground((x + y) % 2 == 0 ? Color.WHITE : Color.GRAY); // Восстанавливаем цвет клетки
+            cells[x][y].setBackground((x + y) % 2 == 0 ? Color.WHITE : Color.GRAY);
         }
         highlightedCells.clear();
     }

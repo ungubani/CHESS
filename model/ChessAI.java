@@ -9,29 +9,25 @@ public class ChessAI {
     private final int depth = 4;
 
     public ChessAI(Board board) {
-        this.board = board; // Получаем ссылку на текущую игровую доску
+        this.board = board;
     }
 
     public Move calculateBestMove(int depth) {
-        List<Move> validMoves = board.getAllValidMoves("black"); // Ходы для ИИ
+        List<Move> validMoves = board.getAllValidMoves("black");
         if (validMoves.isEmpty()) {
-            return null; // Нет доступных ходов
+            return null;
         }
 
         Move bestMove = null;
-        int bestScore = Integer.MIN_VALUE; // Худшая возможная оценка
+        int bestScore = Integer.MIN_VALUE;
 
         for (Move move : validMoves) {
-            // Выполняем пробный ход
             board.applyMove(move);
 
-            // Рассчитываем "лучший" минимакс-ответ с глубиной depth - 1
             int score = minimax(depth - 1, false, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
-            // Отменяем пробный ход
             board.undoMove();
 
-            // Если этот ход лучше текущего, обновляем результат
             if (score > bestScore) {
                 bestScore = score;
                 bestMove = move;
@@ -42,29 +38,28 @@ public class ChessAI {
     }
 
     private int minimax(int depth, boolean maximizingPlayer, int alpha, int beta) {
-        // Основные условия выхода
         if (depth == 0 || board.checkGameEnd() != 0) {
-            return evaluateBoard(); // Оценка текущей позиции
+            return evaluateBoard();
         }
 
         List<Move> validMoves = maximizingPlayer
-                ? board.getAllValidMoves("black") // Ходы ИИ (maximizing)
-                : board.getAllValidMoves("white"); // Ходы игрока (minimizing)
+                ? board.getAllValidMoves("black")
+                : board.getAllValidMoves("white");
 
         if (validMoves.isEmpty()) {
-            return evaluateBoard(); // Позиция остаётся неизменной, если нет ходов
+            return evaluateBoard();
         }
 
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
 
             for (Move move : validMoves) {
-                board.applyMove(move); // Пробный ход
-                int eval = minimax(depth - 1, false, alpha, beta); // Углубляемся за противника
-                board.undoMove(); // Откат хода
+                board.applyMove(move);
+                int eval = minimax(depth - 1, false, alpha, beta);
+                board.undoMove();
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
-                if (beta <= alpha) break; // Альфа-бета отсечение
+                if (beta <= alpha) break;
             }
 
             return maxEval;
@@ -72,12 +67,12 @@ public class ChessAI {
             int minEval = Integer.MAX_VALUE;
 
             for (Move move : validMoves) {
-                board.applyMove(move); // Пробный ход
-                int eval = minimax(depth - 1, true, alpha, beta); // Углубляемся за себя
-                board.undoMove(); // Откат хода
+                board.applyMove(move);
+                int eval = minimax(depth - 1, true, alpha, beta);
+                board.undoMove();
                 minEval = Math.min(minEval, eval);
                 beta = Math.min(beta, eval);
-                if (beta <= alpha) break; // Альфа-бета отсечение
+                if (beta <= alpha) break;
             }
 
             return minEval;
@@ -86,13 +81,13 @@ public class ChessAI {
 
     public int evaluateBoard() {
         if (board.checkGameEnd() == -2) {
-            return Integer.MAX_VALUE; // Чёрные ставят мат
+            return Integer.MAX_VALUE;
         }
         if (board.checkGameEnd() == 2) {
-            return Integer.MIN_VALUE; // Белые ставят мат
+            return Integer.MIN_VALUE;
         }
         if (Math.abs(board.checkGameEnd()) == 1) {
-            return 0; // Пат
+            return 0;
         }
 
         int score = 0;
@@ -113,32 +108,26 @@ public class ChessAI {
 
     private int getPieceValue(Piece piece) {
         if (piece instanceof Pawn) {
-            return 1; // Пешка
+            return 1;
         } else if (piece instanceof Knight) {
-            return 3; // Конь
+            return 3;
         } else if (piece instanceof Bishop) {
-            return 3; // Слон
+            return 3;
         } else if (piece instanceof Rook) {
-            return 5; // Ладья
+            return 5;
         } else if (piece instanceof Queen) {
-            return 9; // Ферзь
+            return 9;
         } else if (piece instanceof King) {
-            return 1000; // Король
+            return 1000;
         }
-        return 0; // Если фигура неизвестна (на всякий случай)
+        return 0;
     }
 
-    /**
-     * Выполняет ход компьютера на доске.
-     * @return true, если ход был успешно выполнен.
-     */
     public boolean performMove() {
-
         Move bestMove = calculateBestMove(depth);
         if (bestMove != null) {
             return board.movePiece(bestMove.fromX, bestMove.fromY, bestMove.toX, bestMove.toY);
         }
-        return false; // Если хода нет, например, шахматный мат
+        return false;
     }
 }
-
