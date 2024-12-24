@@ -11,24 +11,6 @@ public class Rook extends Piece {
     }
 
     @Override
-    public boolean isValidMove(int targetX, int targetY, Board board) {
-        if (this.x - targetX != 0 && this.y - targetY != 0) {
-            return false;
-        }
-
-        if (this.getColor() == board.getPieceAt(targetX, targetY).getColor()) {
-            return false;
-        }
-
-
-        return isPathClear(board, this.x, this.y, targetX, targetY);
-
-        // return true;
-        // int direction = color.equals("white") ? -1 : 1;
-        // return targetX == x + direction && targetY == y && board.getPieceAt(targetX, targetY) == null;
-    }
-
-    @Override
     protected String getType() {
         // TODO Auto-generated method stub
         return "R";
@@ -46,14 +28,14 @@ public class Rook extends Piece {
 
             while (currentX != x || currentY != y) {
                 if (board.getPieceAt(currentX, currentY) != null) {
-                    return false; // Преграда на пути
+                    return false;
                 }
                 currentX += stepX;
                 currentY += stepY;
             }
             return true;
         }
-        return false; // Если не по прямой
+        return false;
     }
 
     public static boolean isPathClear(Board board, int fromX, int fromY, int toX, int toY) {

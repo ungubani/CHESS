@@ -1,11 +1,8 @@
 package view;
 
-import model.*;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.io.File;
+
 
 public class MainMenuView extends JFrame {
     public MainMenuView() {

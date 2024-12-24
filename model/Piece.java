@@ -13,7 +13,7 @@ public abstract class Piece implements Cloneable {
             System.out.println("Для выбранной фигуры неверные значения координат");
         }
         this.color = color;
-        // this.colorCell = ((x + y) % 2 == 0) ? "white" : "black"; 
+
         this.x = x;
         this.y = y;
     }
@@ -36,13 +36,11 @@ public abstract class Piece implements Cloneable {
 
     @Override
     public Object clone() throws CloneNotSupportedException {
-        return super.clone(); // Для простых классов достаточно поверхностного клонирования
+        return super.clone();
     }
 
-    public abstract boolean isValidMove(int targetX, int targetY, Board board);
 
     public String getColor() { return color; }
-    public String getColorCell() { return ((x + y) % 2 == 0) ? "white" : "black"; }
 
     protected abstract String getType();
 

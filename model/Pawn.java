@@ -10,16 +10,6 @@ public class Pawn extends Piece {
         super(color, x, y);
     }
 
-    @Override
-    public boolean isValidMove(int targetX, int targetY, Board board) {
-        if (this.getColor() != board.getCurrentPlayerColor()) {
-            return false;
-        }
-
-        int direction = color == "white" ? -1 : 1;
-
-        return ((targetX == x + direction) || (targetX == x + direction * 2)) && targetY == y && board.getPieceAt(targetX, targetY) == null;
-    }
 
     @Override
     public boolean canAttack(int x, int y, Board board) {
@@ -36,6 +26,10 @@ public class Pawn extends Piece {
 
     @Override
     public List<Move> getPotentialMoves(int x, int y, Piece[][] board) {
+//        if (this.x == x && this.y == y) {
+//            return new ArrayList<>();
+//        }
+
         List<Move> moves = new ArrayList<>();
         int direction = getColor().equals("white") ? -1 : 1;
 

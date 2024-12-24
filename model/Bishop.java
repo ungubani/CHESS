@@ -10,36 +10,51 @@ public class Bishop extends Piece {
         super(color, x, y);
     }
 
-    // Check clear way for Bishop, Rook, Queen
-    public static boolean isPathClear(Board board, int fromX, int fromY, int toX, int toY) {
-        int deltaX = Integer.signum(toX - fromX);
-        int deltaY = Integer.signum(toY - fromY);
-        int newX = fromX + deltaX, newY = fromY + deltaY;
-    
-        while (newX != toX || newY != toY) {
-            if (board.getPieceAt(newX, newY) != null) {
-                return false;
-            }
-            newX += deltaX;
-            newY += deltaY;
+//    // Check clear way for Bishop, Rook, Queen
+//    public static boolean isPathClear(Board board, int fromX, int fromY, int toX, int toY) {
+//        int deltaX = Integer.signum(toX - fromX);
+//        int deltaY = Integer.signum(toY - fromY);
+//        int newX = fromX + deltaX, newY = fromY + deltaY;
+//
+//        while (newX != toX || newY != toY) {
+//            if (board.getPieceAt(newX, newY) != null) {
+//                return false;
+//            }
+//            newX += deltaX;
+//            newY += deltaY;
+//        }
+//        return true;
+//    }
+
+    public static boolean isPathClear(Board board, int startX, int startY, int endX, int endY) {
+        int deltaX = Math.abs(endX - startX);
+        int deltaY = Math.abs(endY - startY);
+
+        // Check if the move is diagonal
+        if (deltaX != deltaY) {
+            return false; // If not diagonal, path is invalid for a bishop
         }
+
+        // Calculate direction of movement
+        int stepX = (endX > startX) ? 1 : -1;
+        int stepY = (endY > startY) ? 1 : -1;
+
+        int currentX = startX + stepX;
+        int currentY = startY + stepY;
+
+        // Check for obstacles along the diagonal path
+        while (currentX != endX && currentY != endY) {
+            if (board.getPieceAt(currentX, currentY) != null) {
+                return false; // Path is blocked by another piece
+            }
+            currentX += stepX;
+            currentY += stepY;
+        }
+
+        // Destination can be occupied, but not blocked along the path
         return true;
     }
 
-    @Override
-    public boolean isValidMove(int targetX, int targetY, Board board) {
-        if (this.getColor() != board.getCurrentPlayerColor()) {
-            return false;
-        }
-        // a-c==b-d || c-a==d-b || -(a-c)==b-d || -(c-a)==d-b  YES
-        if (Math.abs(x-targetX) != Math.abs(y-targetY) || (x-targetX == 0) || (y-targetY == 0)) {
-            return false;
-        }
-
-        return isPathClear(board, this.x, this.y, targetX, targetY);
-        // int direction = color.equals("white") ? -1 : 1;
-        // return targetX == x + direction && targetY == y && board.getPieceAt(targetX, targetY) == null;
-    }
 
     @Override
     public boolean canAttack(int x, int y, Board board) {

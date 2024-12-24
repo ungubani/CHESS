@@ -10,23 +10,6 @@ public class Queen extends Piece{
         super(color, x, y);
     }
 
-    @Override
-    public boolean isValidMove(int targetX, int targetY, Board board) {
-        int dx = this.x - targetX;
-        int dy = this.y - targetY;
-
-//        if ((this.x - targetX == 0 && this.y - targetY == 0) &&
-//            (x-targetX != Math.abs(y-targetY) || (x-targetX == 0) || (y-targetY == 0))) {
-//
-//            return false;
-//        }
-
-        return (dx != 0 || dy != 0) &&
-                (dx == 0 || dy == 0 || dx == dy) &&
-                isPathClear(board, this.x, this.y, targetX, targetY);
-        // int direction = color.equals("white") ? -1 : 1;
-        // return targetX == x + direction && targetY == y && board.getPieceAt(targetX, targetY) == null;
-    }
 
     @Override
     protected String getType() {
@@ -60,7 +43,7 @@ public class Queen extends Piece{
             }
         }
 
-        // Комбинируем движения слона
+        // Движения слона
         int[][] bishopDirections = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
         for (int[] dir : bishopDirections) {
             int newX = x + dir[0], newY = y + dir[1];

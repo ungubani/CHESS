@@ -4,7 +4,7 @@ import view.*;
 public class Main {
     public static void main(String[] args) {
         javax.swing.SwingUtilities.invokeLater(() -> {
-            new MainMenuView(); // Открывает главное меню
+            new MainMenuView();
         });
     }
 }

@@ -10,23 +10,19 @@ public class King extends Piece{
         super(color, x, y);
     }
 
-    @Override
-    public boolean isValidMove(int targetX, int targetY, Board board) {
-        if (this.getColor() != board.getCurrentPlayerColor()) {
-            return false;
-        }
-        
-        if (Math.abs(this.x - targetX) > 1 || Math.abs(this.y - targetY) > 1) {
-            return false;
-        }
-        return true;
-    }
 
     @Override
     public boolean canAttack(int x, int y, Board board) {
+        if (!isInBounds(x, y)) {
+            return false;
+        }
+
         int deltaX = Math.abs(this.x - x);
         int deltaY = Math.abs(this.y - y);
-        // Король может атаковать только соседние клетки
+        if (deltaX == 0 && deltaY == 0) {
+            return false;
+        }
+
         return (deltaX <= 1 && deltaY <= 1);
     }
 

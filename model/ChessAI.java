@@ -3,7 +3,6 @@ package model;
 import model.Board.Move;
 
 import java.util.List;
-import java.util.Random;
 
 public class ChessAI {
     private final Board board;
@@ -13,9 +12,6 @@ public class ChessAI {
         this.board = board; // Получаем ссылку на текущую игровую доску
     }
 
-    /**
-     * Определяет и выполняет лучший ход для компьютера.
-     */
     public Move calculateBestMove(int depth) {
         List<Move> validMoves = board.getAllValidMoves("black"); // Ходы для ИИ
         if (validMoves.isEmpty()) {

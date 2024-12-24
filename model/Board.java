@@ -54,6 +54,9 @@ public class Board implements Cloneable {
             return result;
         }
 
+        public Piece getCapturedPiece() {
+            return capturedPiece;
+        }
     }
 
     private Piece[][] board = new Piece[8][8];
@@ -94,10 +97,32 @@ public class Board implements Cloneable {
         board[0][4] = new King("black", 0, 4);
         board[7][4] = new King("white", 7, 4);
     }
+
+    public Board(boolean isEmpty) {
+        if (!isEmpty) {
+            setupInitialPosition();
+        } else {
+            currentPlayerColor = "white";
+
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    board[i][j] = null;
+                }
+            }
+        }
+    }
     
 
     public Piece getPieceAt(int x, int y) {
         return board[x][y];
+    }
+    public void setPieceAt(int x, int y, Piece piece) {
+        if (!isValidCoordinate(x, y)) {
+            System.out.println("Некорректные координаты для установки фигуры");
+            return;
+        }
+        board[x][y] = piece;
+        piece.setPosition(x, y);
     }
 
     public Piece[][] getBoardArray() {
@@ -114,20 +139,7 @@ public class Board implements Cloneable {
         }
         return false; // Ход недопустим
     }
-    
 
-    // public boolean movePiece(int fromX, int fromY, int toX, int toY) {
-    //     Piece piece = getPieceAt(fromX, fromY);
-    //     if (piece != null && piece.isValidMove(toX, toY, this)) {
-    //         Piece captured = board[toX][toY];
-    //         moveHistory.push(new Move(piece, captured, fromX, fromY, toX, toY));
-    //         board[toX][toY] = piece;
-    //         board[fromX][fromY] = null;
-    //         currentPlayerColor = piece.getColor() == "white" ? "black" : "white"; 
-    //         return true;
-    //     }
-    //     return false;
-    // }
     
     public void undoMove() {
         if (!moveHistory.isEmpty()) {
@@ -141,21 +153,6 @@ public class Board implements Cloneable {
         }
     }    
 
-    // // Check clear way for Bishop, Rook, Queen
-    // public boolean isPathClear(int fromX, int fromY, int toX, int toY) {
-    //     int deltaX = Integer.signum(toX - fromX);
-    //     int deltaY = Integer.signum(toY - fromY);
-    //     int x = fromX + deltaX, y = fromY + deltaY;
-    
-    //     while (x != toX || y != toY) {
-    //         if (board[x][y] != null) {
-    //             return false;
-    //         }
-    //         x += deltaX;
-    //         y += deltaY;
-    //     }
-    //     return true;
-    // }
 
     public boolean isKingInCheck(String color) {
         int kingX = -1, kingY = -1;
@@ -236,19 +233,6 @@ public class Board implements Cloneable {
         return 0;
     }
 
-//    public boolean noValidMoves(String color) {
-//        // Проходим по всем фигурам игрока
-//        for (int i = 0; i < 8; i++) {
-//            for (int j = 0; j < 8; j++) {
-//                List<Move> validMoves = getValidMoves(i, j);
-//
-//                if (validMoves.isEmpty()) {
-//                    return false;
-//                }
-//            }
-//        }
-//        return true; // Нет допустимых ходов
-//    }
 
     public void saveGameToNotationFile(String filePath) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
@@ -291,29 +275,6 @@ public class Board implements Cloneable {
         return "" + file + rank;
     }
 
-//    public void loadGameFromNotationFile(String filePath) {
-//        setupInitialPosition(); // Сбрасываем доску в начальное состояние
-//
-//        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-//            String line;
-//            while ((line = reader.readLine()) != null) {
-//                String[] parts = line.split("\\s+"); // Разделяем номер хода, ход белых и, возможно, ход чёрных
-//
-//                if (parts.length >= 2) {
-//                    Move whiteMove = parseNotationToMove(parts[1]);
-//                    applyMove(whiteMove);
-//                }
-//
-//                if (parts.length == 3) {
-//                    Move blackMove = parseNotationToMove(parts[2]);
-//                    applyMove(blackMove);
-//                }
-//            }
-//            System.out.println("Партия успешно загружена из файла: " + filePath);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     public void loadGameFromNotationFile(String filePath) {
         setupInitialPosition(); // Устанавливаем начальную позицию доски
@@ -350,59 +311,20 @@ public class Board implements Cloneable {
         }
     }
 
-    public boolean isCheckmate(String color) {
-        // Проверить, находится ли король в шахе
-        if (!isKingInCheck(color)) {
-            return false; // Если король не в шахе, мата нет
-        }
-
-        // Проверить все возможные ходы каждой фигуры данного цвета
-        for (int x = 0; x < 8; x++) {
-            for (int y = 0; y < 8; y++) {
-                Piece piece = getPieceAt(x, y);
-                if (piece != null && piece.getColor().equals(color)) {
-                    // Попробовать все возможные ходы фигуры
-                    for (int newX = 0; newX < 8; newX++) {
-                        for (int newY = 0; newY < 8; newY++) {
-                            if (piece.isValidMove(newX, newY, this)) {
-
-                                Move tempMove = new Move(piece, getPieceAt(newX, newY), x, y, newX, newY);
-                                // Сделать временный ход
-                                applyMove(tempMove);
-
-                                // Проверить, осталось ли состояние шаха после хода
-                                boolean stillInCheck = isKingInCheck(color);
-
-                                // Откат хода
-                                undoMove();
-
-                                // Если есть хотя бы один ход, который выводит короля из шаха, мата нет
-                                if (!stillInCheck) {
-                                    return false;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        // Если ни один ход не выводит короля из шаха, это мат
-        return true;
-    }
 
 //    public void applyMove(Move move) {
-//
 //        if (move == null || move.movedPiece == null) {
 //            throw new IllegalArgumentException("Некорректный ход: move или movedPiece равно null");
 //        }
 //
 //        Piece piece = move.movedPiece; // Фигура, которая делает ход
 //
-//        piece.isInBounds(move.toX, move.toY);
+//        if (!piece.isInBounds(move.toX, move.toY)) {
+//            System.out.println("Некорректные координаты для хода: " + move.toX + "," + move.toY);
+//            return;
+//        }
 //
-//        // Если была съедена фигура, добавьте дополнительную логику, например:
 //        move.capturedPiece = getPieceAt(move.toX, move.toY);
-//
 //
 //        board[move.fromX][move.fromY] = null; // Очищаем исходную клетку
 //        board[move.toX][move.toY] = piece; // Ставим фигуру на новую клетку
@@ -410,8 +332,16 @@ public class Board implements Cloneable {
 //        // Обновляем позицию фигуры
 //        piece.setPosition(move.toX, move.toY);
 //
+//        // Проверка шахматной логики - превращение пешки в ферзя
+//        if (piece instanceof Pawn) { // Если фигура - пешка
+//            if ((piece.getColor().equals("white") && move.toX == 0) ||
+//                    (piece.getColor().equals("black") && move.toX == 7)) {
 //
-//        // Сохраняем ход в историю
+//                board[move.toX][move.toY] = new Queen(piece.getColor(), move.toX, move.toY);
+//                System.out.println("Пешка превращена в ферзя на позиции " + move.toX + "," + move.toY);
+//            }
+//        }
+//
 //        moveHistory.push(move);
 //
 //        currentPlayerColor = Objects.equals(piece.getColor(), "white") ? "black" : "white";
@@ -422,43 +352,51 @@ public class Board implements Cloneable {
 //    }
 
     public void applyMove(Move move) {
+        // Проверка на null
         if (move == null || move.movedPiece == null) {
             throw new IllegalArgumentException("Некорректный ход: move или movedPiece равно null");
         }
 
-        Piece piece = move.movedPiece; // Фигура, которая делает ход
+        // Проверка валидности координат
+        if (!isValidCoordinate(move.fromX, move.fromY) || !isValidCoordinate(move.toX, move.toY)) {
+            throw new IllegalArgumentException("Некорректные координаты: " +
+                    "from(" + move.fromX + "," + move.fromY + "), " +
+                    "to(" + move.toX + "," + move.toY + ")");
+        }
 
-        piece.isInBounds(move.toX, move.toY);
+        Piece piece = move.movedPiece;
 
-        // Если была съедена фигура, добавьте дополнительную логику, например:
-        move.capturedPiece = getPieceAt(move.toX, move.toY);
+        move.capturedPiece = getPieceAt(move.toX, move.toY); // Проверяем, есть ли фигура на целевой клетке
 
+        // Выполняем перемещение
         board[move.fromX][move.fromY] = null; // Очищаем исходную клетку
-        board[move.toX][move.toY] = piece; // Ставим фигуру на новую клетку
+        board[move.toX][move.toY] = piece; // Перемещаем фигуру
 
-        // Обновляем позицию фигуры
+        // Обновляем положение фигуры
         piece.setPosition(move.toX, move.toY);
 
-        // Проверяем шахматную логику - превращение пешки в ферзя
-        if (piece instanceof Pawn) { // Если фигура - пешка
-            if ((piece.getColor().equals("white") && move.toX == 0) || // Пешка белых дошла до последнего ряда
-                    (piece.getColor().equals("black") && move.toX == 7)) { // Пешка чёрных дошла до последнего ряда
+        // Логика превращения пешки
+        if (piece instanceof Pawn) { // Если фигура является пешкой
+            if ((piece.getColor().equals("white") && move.toX == 0) ||  // Белая пешка дошла до конца доски
+                    (piece.getColor().equals("black") && move.toX == 7)) {  // Черная пешка дошла до конца доски
 
-                // Превращаем в ферзя, меняя объект пешки
-                board[move.toX][move.toY] = new Queen(piece.getColor(), move.toX, move.toY);
+                board[move.toX][move.toY] = new Queen(piece.getColor(), move.toX, move.toY); // Превращаем в ферзя
                 System.out.println("Пешка превращена в ферзя на позиции " + move.toX + "," + move.toY);
             }
         }
 
-        // Сохраняем ход в историю
+        // Фиксируем ход
         moveHistory.push(move);
 
+        // Меняем текущего игрока
         currentPlayerColor = Objects.equals(piece.getColor(), "white") ? "black" : "white";
 
+        // Проверяем шах
         if (isKingInCheck(currentPlayerColor)) {
-            System.out.println("Шах королю " + this.currentPlayerColor + "от фигуры " + piece.pieceInfo());
+            System.out.println("Шах королю " + this.currentPlayerColor + " от фигуры " + piece.pieceInfo());
         }
     }
+
 
     public List<Move> getAllValidMoves(String playerColor) {
         List<Move> moves = new ArrayList<>();
@@ -476,55 +414,6 @@ public class Board implements Cloneable {
 
         return moves; // Возвращаем список всех валидных ходов
     }
-
-//    private Move parseNotationToMove(String notation) {
-//        String fromNotation = notation.substring(notation.indexOf("-")-2, notation.indexOf("-")); // Исходная клетка: "e2"
-//        String toNotation = notation.substring(notation.length() - 2); // Целевая клетка: "e4"
-//
-//        int fromX = 8 - Character.getNumericValue(fromNotation.charAt(1));
-//        int fromY = fromNotation.charAt(0) - 'a';
-//
-//        int toX = 8 - Character.getNumericValue(toNotation.charAt(1));
-//        int toY = toNotation.charAt(0) - 'a';
-//
-//        Piece piece = getPieceAt(fromX, fromY);
-//        return new Move(piece, getPieceAt(toX, toY), fromX, fromY, toX, toY);
-//    }
-
-//    public Move parseNotationToMove(String notation) {
-//        if (notation == null || notation.isEmpty()) {
-//            throw new IllegalArgumentException("Нотация не может быть пустой или null");
-//        }
-//
-//        // Например, ожидается формат "e2-e4" (проверка длины или структуры)
-//        if (notation.length() < 5 || notation.charAt(2) != '-') {
-//            throw new IllegalArgumentException("Некорректный формат нотации: " + notation);
-//        }
-//
-//        try {
-//            // Ходы, например, "e2-e4" -> fromX=e, fromY=2, toX=e, toY=4
-//            int fromY = notation.charAt(0) - 'a'; // Преобразуем 'e' в индекс (0-7)
-//            int fromX = Character.getNumericValue(notation.charAt(1)) - 1; // Преобразуем '2' в индекс (0-7)
-//
-//            Piece movedPiece = getPieceAt(fromX, fromY);
-//
-//            int toY = notation.charAt(3) - 'a'; // Преобразуем 'e' в индекс (0-7)
-//            int to = Character.getNumericValue(notation.charAt(4)) - 1; // Преобразуем '4' в индекс (0-7)
-//
-//            Piece capturedPiece = getPieceAt(toX, toY);
-//
-//            // Проверяем корректность координат
-//            if (!isValidCoordinate(fromX, fromY) || !isValidCoordinate(toX, toY)) {
-//                throw new IllegalArgumentException("Некорректные координаты в нотации: " + notation);
-//            }
-//
-//            // Возвращаем объект Move
-//            Move move = new Move(movedPiece, capturedPiece, fromX, fromY, toX, toY);
-//            return move;
-//        } catch (IndexOutOfBoundsException | NumberFormatException e) {
-//            throw new IllegalArgumentException("Ошибка обработки нотации: " + notation, e);
-//        }
-//    }
 
     public Move parseNotationToMove(String notation) {
         if (notation == null || notation.isEmpty()) {
@@ -553,7 +442,7 @@ public class Board implements Cloneable {
             if (from.length() < 2) {
                 throw new IllegalArgumentException("Некорректный формат начальной клетки: " + from);
             }
-            int fromY = from.charAt(from.length() - 2) - 'a'; // 'a'-'h' -> 0-7
+            int fromY = from.charAt(from.length() - 2) - 'a'; // 'a'-'h' -> 7-0
             int fromX = 8 - Character.getNumericValue(from.charAt(from.length() - 1)); // '1'-'8' -> 7-0
 
             // Конечная клетка (последние 2 символа второй части)
@@ -586,67 +475,12 @@ public class Board implements Cloneable {
         return x >= 0 && x < 8 && y >= 0 && y < 8; // Шахматная доска 8x8
     }
 
-//    public Move parseNotationToMove(String notation) {
-//        if (notation == null || notation.isEmpty()) {
-//            throw new IllegalArgumentException("Нотация не может быть пустой");
-//        }
-//
-//        // Проверяем, является ли текущая нотация взятием фигуры (содержит ли "x")
-//        boolean isCapture = notation.contains("x");
-//
-//        // Для хранения координат
-//        String fromPosition = null;
-//        String toPosition;
-//
-//        // Если есть взятие, разделяем нотацию по "x", чтобы выделить начальную и конечную позиции
-//        if (isCapture) {
-//            String[] parts = notation.split("x");
-//            fromPosition = parts[0].substring(parts[0].length() - 2); // 2 последних символа — позиция
-//            toPosition = parts[1];
-//        } else {
-//            // Обычный ход
-//            if (notation.length() == 2 || notation.length() == 4) {
-//                toPosition = notation.substring(notation.length() - 2); // Конечная позиция
-//                if (notation.length() > 2) {
-//                    fromPosition = notation.substring(notation.length() - 4, notation.length() - 2); // Начальная позиция
-//                }
-//            } else {
-//                throw new IllegalArgumentException("Некорректный формат нотации: " + notation);
-//            }
-//        }
-//
-//        // Конвертируем позиции на доске из шахматного формата в числовую систему (например, "e2" -> x=4, y=1)
-//        int fromX = -1, fromY = -1;
-//        if (fromPosition != null) {
-//            fromX = fromPosition.charAt(0) - 'a'; // Преобразуем букву столбца в индекс
-//            fromY = Character.getNumericValue(fromPosition.charAt(1)) - 1; // Преобразуем номер строки
-//        }
-//
-//        int toX = toPosition.charAt(0) - 'a';
-//        int toY = Character.getNumericValue(toPosition.charAt(1)) - 1;
-//
-//        // Определяем перемещаемую фигуру с позиции fromX/fromY
-//        Piece movedPiece = this.getPieceAt(fromX, fromY);
-//        if (movedPiece == null) {
-//            throw new IllegalArgumentException("Перемещаемая фигура не найдена на: " + fromPosition);
-//        }
-//
-//        // Определяем взятую фигуру с позиции toX/toY (если взятие)
-//        Piece capturedPiece = null;
-//        if (isCapture) {
-//            capturedPiece = this.getPieceAt(toX, toY);
-//        }
-//
-//        // Создаём объект движения
-//        return new Move(movedPiece, capturedPiece, fromX, fromY, toX, toY);
-//    }
-
 
     public List<Move> getValidMoves(int x, int y) {
         List<Move> validMoves = new ArrayList<>();
         Piece piece = getPieceAt(x, y);
 
-        if (piece == null || piece.getColor() != getCurrentPlayerColor()) {
+        if (piece == null || !Objects.equals(piece.getColor(), getCurrentPlayerColor())) {
             return validMoves; // Если нет фигуры или фигура не того игрока, возврат пустого списка
         }
 
@@ -666,9 +500,6 @@ public class Board implements Cloneable {
     }
 
     private boolean isMoveValid(Move move) throws CloneNotSupportedException {
-        // if (move.movedPiece.getColor() != getCurrentPlayerColor()) {
-        //     return false;
-        // }
 
         // 1. Проверка базовой корректности
         Piece piece = getPieceAt(move.fromX, move.fromY);
@@ -679,7 +510,7 @@ public class Board implements Cloneable {
         // Проверяем, соответствует ли ход возможным ходам фигуры
         List<Move> potentialMoves = piece.getPotentialMoves(move.fromX, move.fromY, board);
 
-        System.out.println(potentialMoves);
+        // System.out.println(potentialMoves);
 
         if (!potentialMoves.contains(move)) {
             return false;
@@ -696,7 +527,6 @@ public class Board implements Cloneable {
     }
 
 
-
     @Override
     public Object clone() throws CloneNotSupportedException {
         Board clonedBoard = (Board) super.clone(); // Создаем поверхностную копию
@@ -710,11 +540,6 @@ public class Board implements Cloneable {
                 }
             }
         }
-
-        // // Клонируем историю ходов
-        // if (this.moveHistory != null) {
-        //     clonedBoard.moveHistory.addAll(this.moveHistory);
-        // }
 
         return clonedBoard;
     }

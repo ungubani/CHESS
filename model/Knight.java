@@ -11,33 +11,6 @@ public class Knight extends Piece {
     }
 
     @Override
-    public boolean isValidMove(int targetX, int targetY, Board board) {
-        if (!isInBounds(targetX, targetY)) {
-            return false;
-        }
-
-        if (this.getColor() != board.getCurrentPlayerColor()) {
-            return false;
-        }
-
-        int dx = Math.abs(this.x - targetX);
-        int dy = Math.abs(this.y - targetY);
-
-        if (!(dx == 2 && dy == 1) && !(dx == 1 && dy == 2)) {
-            return false;
-        }
-
-        if (this.getColor() == board.getPieceAt(targetX, targetY).getColor()) {
-            return false;
-        }
-
-        return true;
-        // return board.isPathClear(this.x, this.y, targetX, targetY);
-        // int direction = color.equals("white") ? -1 : 1;
-        // return targetX == x + direction && targetY == y && board.getPieceAt(targetX, targetY) == null;
-    }
-
-    @Override
     public boolean canAttack(int x, int y, Board board) {
         // Конь угрожает "г-образно", без преград
         int deltaX = Math.abs(this.x - x);
@@ -72,6 +45,4 @@ public class Knight extends Piece {
 
         return moves;
     }
-
-    
 }
