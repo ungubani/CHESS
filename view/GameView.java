@@ -5,6 +5,7 @@ import model.Board.Move;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,9 @@ public class GameView extends JFrame {
         setupListeners();
         setupButtons();
 
+        // Центрируем окно относительно экрана
+        setLocationRelativeTo(null);
+
         setVisible(true);
     }
 
@@ -47,7 +51,18 @@ public class GameView extends JFrame {
         // Кнопка сохранения партии
         JButton saveButton = new JButton("Сохранить партию");
         saveButton.addActionListener(e -> {
+            // Создаем объект JFileChooser
             JFileChooser fileChooser = new JFileChooser();
+
+            // Задаем начальный путь
+            String projectPath = System.getProperty("/CHESS"); // Корневая директория проекта
+            File myGamesDir = new File(projectPath, "MyGames");
+            if (!myGamesDir.exists()) {
+                myGamesDir.mkdirs(); // Создаем папку, если она не существует
+            }
+            fileChooser.setCurrentDirectory(myGamesDir);
+
+            // Открываем диалог сохранения
             if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 board.saveGameToNotationFile(fileChooser.getSelectedFile().getPath());
                 System.out.println("Партия сохранена");
@@ -58,7 +73,18 @@ public class GameView extends JFrame {
         // Кнопка загрузки партии
         JButton loadButton = new JButton("Загрузить партию");
         loadButton.addActionListener(e -> {
+            // Создаем объект JFileChooser
             JFileChooser fileChooser = new JFileChooser();
+
+            // Задаем начальный путь
+            String projectPath = System.getProperty("/CHESS"); // Корневая директория проекта
+            File myGamesDir = new File(projectPath, "MyGames");
+            if (!myGamesDir.exists()) {
+                myGamesDir.mkdirs(); // Создаем папку, если она не существует
+            }
+            fileChooser.setCurrentDirectory(myGamesDir);
+
+            // Открываем диалог загрузки
             if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 board.loadGameFromNotationFile(fileChooser.getSelectedFile().getPath());
                 boardPanel.updateBoard(board.getBoardArray());
@@ -68,6 +94,12 @@ public class GameView extends JFrame {
         buttonPanel.add(loadButton);
 
         add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    public void loadGame(String filePath) {
+        board.loadGameFromNotationFile(filePath); // Загрузка модели доски из файла
+        boardPanel.updateBoard(board.getBoardArray()); // Отображение загруженного состояния
+        System.out.println("Загружена партия из файла: " + filePath);
     }
 
     private void setupListeners() {

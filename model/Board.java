@@ -133,6 +133,8 @@ public class Board implements Cloneable {
         if (!moveHistory.isEmpty()) {
             Move lastMove = moveHistory.pop();
             board[lastMove.fromX][lastMove.fromY] = lastMove.movedPiece;
+            lastMove.movedPiece.setPosition(lastMove.fromX, lastMove.fromY);
+
             board[lastMove.toX][lastMove.toY] = lastMove.capturedPiece;
             currentPlayerColor = lastMove.movedPiece.getColor();
 //            currentPlayerColor = lastMove.movedPiece.getColor() == "white" ? "black" : "white";
@@ -289,24 +291,59 @@ public class Board implements Cloneable {
         return "" + file + rank;
     }
 
+//    public void loadGameFromNotationFile(String filePath) {
+//        setupInitialPosition(); // Сбрасываем доску в начальное состояние
+//
+//        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+//            String line;
+//            while ((line = reader.readLine()) != null) {
+//                String[] parts = line.split("\\s+"); // Разделяем номер хода, ход белых и, возможно, ход чёрных
+//
+//                if (parts.length >= 2) {
+//                    Move whiteMove = parseNotationToMove(parts[1]);
+//                    applyMove(whiteMove);
+//                }
+//
+//                if (parts.length == 3) {
+//                    Move blackMove = parseNotationToMove(parts[2]);
+//                    applyMove(blackMove);
+//                }
+//            }
+//            System.out.println("Партия успешно загружена из файла: " + filePath);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
     public void loadGameFromNotationFile(String filePath) {
-        setupInitialPosition(); // Сбрасываем доску в начальное состояние
+        setupInitialPosition(); // Устанавливаем начальную позицию доски
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
+
+            // Читаем строку за строкой
             while ((line = reader.readLine()) != null) {
-                String[] parts = line.split("\\s+"); // Разделяем номер хода, ход белых и, возможно, ход чёрных
+                String[] parts = line.split("\\s+"); // Разбиваем строку по пробелам: ["1.", "d2-d4", "d7-d5"]
 
-                if (parts.length >= 2) {
-                    Move whiteMove = parseNotationToMove(parts[1]);
-                    applyMove(whiteMove);
-                }
+                try {
+                    // Если есть второй ход - белый
+                    if (parts.length >= 2) {
+                        String whiteMoveNotation = parts[1]; // Первый ход
+                        Move whiteMove = parseNotationToMove(whiteMoveNotation); // Преобразуем нотацию в объект Move
+                        applyMove(whiteMove); // Применяем ход на доску
+                    }
 
-                if (parts.length == 3) {
-                    Move blackMove = parseNotationToMove(parts[2]);
-                    applyMove(blackMove);
+                    // Если есть третий ход - чёрный
+                    if (parts.length == 3) {
+                        String blackMoveNotation = parts[2]; // Второй ход
+                        Move blackMove = parseNotationToMove(blackMoveNotation); // Преобразуем нотацию в объект Move
+                        applyMove(blackMove); // Применяем ход на доску
+                    }
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Пропуск некорректной строки: " + line + " (" + e.getMessage() + ")");
                 }
             }
+
             System.out.println("Партия успешно загружена из файла: " + filePath);
         } catch (IOException e) {
             e.printStackTrace();
@@ -354,9 +391,18 @@ public class Board implements Cloneable {
     }
 
     public void applyMove(Move move) {
+
+        if (move == null || move.movedPiece == null) {
+            throw new IllegalArgumentException("Некорректный ход: move или movedPiece равно null");
+        }
+
         Piece piece = move.movedPiece; // Фигура, которая делает ход
+
+        piece.isInBounds(move.toX, move.toY);
+
         // Если была съедена фигура, добавьте дополнительную логику, например:
         move.capturedPiece = getPieceAt(move.toX, move.toY);
+
 
         board[move.fromX][move.fromY] = null; // Очищаем исходную клетку
         board[move.toX][move.toY] = piece; // Ставим фигуру на новую клетку
@@ -375,20 +421,169 @@ public class Board implements Cloneable {
         }
     }
 
+//    private Move parseNotationToMove(String notation) {
+//        String fromNotation = notation.substring(notation.indexOf("-")-2, notation.indexOf("-")); // Исходная клетка: "e2"
+//        String toNotation = notation.substring(notation.length() - 2); // Целевая клетка: "e4"
+//
+//        int fromX = 8 - Character.getNumericValue(fromNotation.charAt(1));
+//        int fromY = fromNotation.charAt(0) - 'a';
+//
+//        int toX = 8 - Character.getNumericValue(toNotation.charAt(1));
+//        int toY = toNotation.charAt(0) - 'a';
+//
+//        Piece piece = getPieceAt(fromX, fromY);
+//        return new Move(piece, getPieceAt(toX, toY), fromX, fromY, toX, toY);
+//    }
 
-    private Move parseNotationToMove(String notation) {
-        String fromNotation = notation.substring(notation.indexOf("-")-2, notation.indexOf("-")); // Исходная клетка: "e2"
-        String toNotation = notation.substring(notation.length() - 2); // Целевая клетка: "e4"
+//    public Move parseNotationToMove(String notation) {
+//        if (notation == null || notation.isEmpty()) {
+//            throw new IllegalArgumentException("Нотация не может быть пустой или null");
+//        }
+//
+//        // Например, ожидается формат "e2-e4" (проверка длины или структуры)
+//        if (notation.length() < 5 || notation.charAt(2) != '-') {
+//            throw new IllegalArgumentException("Некорректный формат нотации: " + notation);
+//        }
+//
+//        try {
+//            // Ходы, например, "e2-e4" -> fromX=e, fromY=2, toX=e, toY=4
+//            int fromY = notation.charAt(0) - 'a'; // Преобразуем 'e' в индекс (0-7)
+//            int fromX = Character.getNumericValue(notation.charAt(1)) - 1; // Преобразуем '2' в индекс (0-7)
+//
+//            Piece movedPiece = getPieceAt(fromX, fromY);
+//
+//            int toY = notation.charAt(3) - 'a'; // Преобразуем 'e' в индекс (0-7)
+//            int to = Character.getNumericValue(notation.charAt(4)) - 1; // Преобразуем '4' в индекс (0-7)
+//
+//            Piece capturedPiece = getPieceAt(toX, toY);
+//
+//            // Проверяем корректность координат
+//            if (!isValidCoordinate(fromX, fromY) || !isValidCoordinate(toX, toY)) {
+//                throw new IllegalArgumentException("Некорректные координаты в нотации: " + notation);
+//            }
+//
+//            // Возвращаем объект Move
+//            Move move = new Move(movedPiece, capturedPiece, fromX, fromY, toX, toY);
+//            return move;
+//        } catch (IndexOutOfBoundsException | NumberFormatException e) {
+//            throw new IllegalArgumentException("Ошибка обработки нотации: " + notation, e);
+//        }
+//    }
 
-        int fromX = 8 - Character.getNumericValue(fromNotation.charAt(1));
-        int fromY = fromNotation.charAt(0) - 'a';
+    public Move parseNotationToMove(String notation) {
+        if (notation == null || notation.isEmpty()) {
+            throw new IllegalArgumentException("Нотация не может быть пустой или null");
+        }
 
-        int toX = 8 - Character.getNumericValue(toNotation.charAt(1));
-        int toY = toNotation.charAt(0) - 'a';
+        // Убедимся, что длина нотации позволяет извлечь координаты (минимум 5 символов без учета взятий)
+        if (notation.length() < 5) {
+            throw new IllegalArgumentException("Некорректный формат нотации: " + notation);
+        }
 
-        Piece piece = getPieceAt(fromX, fromY);
-        return new Move(piece, getPieceAt(toX, toY), fromX, fromY, toX, toY);
+        try {
+            // Определяем, является ли ход взятием (содержит 'x' или '-')
+            char delimiter = notation.contains("x") ? 'x' : '-';
+
+            // Разделяем строку по символу разделителя
+            String[] parts = notation.split(Character.toString(delimiter));
+
+            // Проверка на корректность разбиения
+            if (parts.length != 2) {
+                throw new IllegalArgumentException("Некорректный формат нотации: " + notation);
+            }
+
+            // Начальная клетка (2 символа в первой части)
+            String from = parts[0];
+            if (from.length() < 2) {
+                throw new IllegalArgumentException("Некорректный формат начальной клетки: " + from);
+            }
+            int fromY = from.charAt(from.length() - 2) - 'a'; // 'a'-'h' -> 0-7
+            int fromX = 8 - Character.getNumericValue(from.charAt(from.length() - 1)); // '1'-'8' -> 7-0
+
+            // Конечная клетка (последние 2 символа второй части)
+            String to = parts[1];
+            if (to.length() < 2) {
+                throw new IllegalArgumentException("Некорректный формат конечной клетки: " + to);
+            }
+            int toY = to.charAt(0) - 'a'; // 'a'-'h' -> 0-7
+            int toX = 8 - Character.getNumericValue(to.charAt(1)); // '1'-'8' -> 7-0
+
+            // Проверяем корректность индексации
+            if (!isValidCoordinate(fromX, fromY) || !isValidCoordinate(toX, toY)) {
+                throw new IllegalArgumentException("Некорректные координаты в нотации: " + notation);
+            }
+
+            // Извлекаем фигуры
+            Piece movedPiece = getPieceAt(fromX, fromY);
+            Piece capturedPiece = getPieceAt(toX, toY); // Может быть null, если нет взятия
+
+            // Формируем и возвращаем объект Move
+            return new Move(movedPiece, capturedPiece, fromX, fromY, toX, toY);
+        } catch (IndexOutOfBoundsException | NumberFormatException e) {
+            throw new IllegalArgumentException("Ошибка обработки нотации: " + notation, e);
+        }
     }
+
+
+    // Дополнительный метод для проверки координат
+    private boolean isValidCoordinate(int x, int y) {
+        return x >= 0 && x < 8 && y >= 0 && y < 8; // Шахматная доска 8x8
+    }
+
+//    public Move parseNotationToMove(String notation) {
+//        if (notation == null || notation.isEmpty()) {
+//            throw new IllegalArgumentException("Нотация не может быть пустой");
+//        }
+//
+//        // Проверяем, является ли текущая нотация взятием фигуры (содержит ли "x")
+//        boolean isCapture = notation.contains("x");
+//
+//        // Для хранения координат
+//        String fromPosition = null;
+//        String toPosition;
+//
+//        // Если есть взятие, разделяем нотацию по "x", чтобы выделить начальную и конечную позиции
+//        if (isCapture) {
+//            String[] parts = notation.split("x");
+//            fromPosition = parts[0].substring(parts[0].length() - 2); // 2 последних символа — позиция
+//            toPosition = parts[1];
+//        } else {
+//            // Обычный ход
+//            if (notation.length() == 2 || notation.length() == 4) {
+//                toPosition = notation.substring(notation.length() - 2); // Конечная позиция
+//                if (notation.length() > 2) {
+//                    fromPosition = notation.substring(notation.length() - 4, notation.length() - 2); // Начальная позиция
+//                }
+//            } else {
+//                throw new IllegalArgumentException("Некорректный формат нотации: " + notation);
+//            }
+//        }
+//
+//        // Конвертируем позиции на доске из шахматного формата в числовую систему (например, "e2" -> x=4, y=1)
+//        int fromX = -1, fromY = -1;
+//        if (fromPosition != null) {
+//            fromX = fromPosition.charAt(0) - 'a'; // Преобразуем букву столбца в индекс
+//            fromY = Character.getNumericValue(fromPosition.charAt(1)) - 1; // Преобразуем номер строки
+//        }
+//
+//        int toX = toPosition.charAt(0) - 'a';
+//        int toY = Character.getNumericValue(toPosition.charAt(1)) - 1;
+//
+//        // Определяем перемещаемую фигуру с позиции fromX/fromY
+//        Piece movedPiece = this.getPieceAt(fromX, fromY);
+//        if (movedPiece == null) {
+//            throw new IllegalArgumentException("Перемещаемая фигура не найдена на: " + fromPosition);
+//        }
+//
+//        // Определяем взятую фигуру с позиции toX/toY (если взятие)
+//        Piece capturedPiece = null;
+//        if (isCapture) {
+//            capturedPiece = this.getPieceAt(toX, toY);
+//        }
+//
+//        // Создаём объект движения
+//        return new Move(movedPiece, capturedPiece, fromX, fromY, toX, toY);
+//    }
 
 
     public List<Move> getValidMoves(int x, int y) {
@@ -438,7 +633,10 @@ public class Board implements Cloneable {
         Board testBoard = (Board) this.clone(); // Копируем текущую доску для симуляции
         testBoard.applyMove(move); // Выполняем ход
 
-        return !testBoard.isKingInCheck(piece.getColor());
+        boolean isValid = !testBoard.isKingInCheck(piece.getColor());
+        testBoard.undoMove();
+
+        return isValid;
     }
 
 

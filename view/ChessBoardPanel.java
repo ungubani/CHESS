@@ -67,7 +67,10 @@ public class ChessBoardPanel extends JPanel {
     private List<Point> highlightedCells = new ArrayList<>();
 
     public ChessBoardPanel() {
-        setLayout(new GridLayout(8, 8));
+        setLayout(new BorderLayout());
+
+        // Основная доска с клетками
+        JPanel boardPanel = new JPanel(new GridLayout(8, 8));
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 JButton cell = new JButton();
@@ -76,9 +79,32 @@ public class ChessBoardPanel extends JPanel {
                 cell.setOpaque(true);
                 cell.setBorderPainted(false);
                 cells[i][j] = cell;
-                add(cells[i][j]);
+                boardPanel.add(cell);
             }
         }
+
+        // Панель с номерами строк слева
+        JPanel rowLabels = new JPanel();
+        rowLabels.setLayout(new GridLayout(8, 1));
+        for (int i = 8; i >= 1; i--) { // Номера строк (1–8 в обратном порядке сверху вниз)
+            JLabel label = new JLabel(String.valueOf(i), SwingConstants.CENTER);
+            label.setFont(new Font("Arial", Font.BOLD, 16));
+            rowLabels.add(label);
+        }
+
+        // Панель с буквами столбцов снизу
+        JPanel columnLabels = new JPanel();
+        columnLabels.setLayout(new GridLayout(1, 8));
+        for (char c = 'A'; c <= 'H'; c++) { // Буквы колонок (A–H)
+            JLabel label = new JLabel(String.valueOf(c), SwingConstants.CENTER);
+            label.setFont(new Font("Arial", Font.BOLD, 16));
+            columnLabels.add(label);
+        }
+
+        // Добавляем метки строк и столбцов к "рамке" доски
+        add(boardPanel, BorderLayout.CENTER); // Шахматная доска в центре
+        add(rowLabels, BorderLayout.WEST);    // Номера строк слева
+        add(columnLabels, BorderLayout.SOUTH); // Буквы столбцов снизу
     }
 
     public JButton[][] getCells() {
