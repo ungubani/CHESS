@@ -13,6 +13,7 @@ import java.util.List;
 public class GameView extends JFrame {
     private ChessBoardPanel boardPanel; // Панель для отображения доски
     private Board board; // Модель доски
+    private boolean gameEnded = false; // Новый флаг состояния игры
     private int selectedX = -1, selectedY = -1; // Координаты выбранной фигуры
 
     public GameView(boolean againstComputer) {
@@ -43,6 +44,7 @@ public class GameView extends JFrame {
         JButton undoButton = new JButton("Отменить ход");
         undoButton.addActionListener(e -> {
             board.undoMove();
+            gameEnded = false;
             boardPanel.updateBoard(board.getBoardArray());
             System.out.println("Ход отменен");
         });
@@ -210,9 +212,6 @@ public class GameView extends JFrame {
 //            JOptionPane.showMessageDialog(this, "Пат! Ничья!", "Игра завершена", JOptionPane.INFORMATION_MESSAGE);
 //            endGame(); // Завершаем игру без сброса
 //        }
-
-
-    private boolean gameEnded = false; // Новый флаг состояния игры
 
     private void endGame() {
         gameEnded = true; // Устанавливаем флаг
