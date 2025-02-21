@@ -1,0 +1,102 @@
+'https://plantuml.com/sequence-diagram
+
+@startuml
+
+!define root_package .
+
+
+class Bishop {
+    +isPathClear(Board board, int startX, int startY, int endX, int endY)
+    +canAttack(int x, int y, Board board)
+    #getType()
+    +getPotentialMoves(int x, int y, Piece[][] board)
+}
+Bishop --|> Piece
+
+class King {
+    +canAttack(int x, int y, Board board)
+    #getType()
+    +getPotentialMoves(int, int y, Piece[][] board)
+}
+King --|> Piece
+class Knight {
+    +canAttack(int x, int y, Board board)
+    #getType()
+    +getPotentialMoves(int, int y, Piece[][] board)
+}
+Knight --|> Piece
+class Pawn {
+    +canAttack(int x, int y, Board board)
+    #getType()
+    +getPotentialMoves(int, int y, Piece[][] board)
+}
+Pawn --|> Piece
+class Queen {
+    +canAttack(int x, int y, Board board)
+    #getType()
+    +getPotentialMoves(int, int y, Piece[][] board)
+}
+Queen --|> Piece
+class Rook {
+    +canAttack(int x, int y, Board board)
+    #getType()
+    +getPotentialMoves(int, int y, Piece[][] board)
+}
+Rook --|> Piece
+abstract class Piece {
+    # color : String
+    # x : int
+    # y : int
+    +*canAttack(int x, int y, Board board) : boolean
+    +setPosition(int newX, int newY)
+    +isInBounds(int x, int y) : boolean
+    +clone() : Object
+    +getColor() : String
+    +pieceInfo() : String
+    #*getType() : String
+    +*getPotentialMoves(int x, int y, Piece[][] board) : List<Move>
+}
+Piece ..|> Cloneable
+left to right direction
+class Main {
+    +main(String[] args) : void {static}
+}
+class Board {
+    +equals(Object obj)
+    +hashCode()
+    +getCapturedPiece()
+    -setupInitialPosition()
+    +getPieceAt(int x, int y)
+    +setPieceAt(int x, int y, Piece piece)
+    +movePiece(int fromX, int fromY, int toX, int toY)
+    +undoMove()
+    +isKingInCheck(String color)
+    +noValidMoves(String color)
+    +checkGameEnd()
+    +saveGameToNotationFile(String filePath)
+    -convertMoveToNotation(Move move)
+    -convertPositionToNotation(int x, int y)
+    +loadGameFromNotationFile(String filePath)
+    +applyMove(Move move)
+    +parseNotationToMove(String notation)
+    -isValidCoordinate(int x, int y)
+    -isMoveValid(Move move)
+    +clone()
+    +getCurrentPlayerColor()
+}
+Board ..|> Cloneable
+
+class ChessAI {
+    -board : Board {final}
+    -depth : int {final}
+
+    +calculateBestMove(int depth)
+    -minimax(int depth, boolean maximizingPlayer, int alpha, int beta)
+    +evaluateBoard()
+    -getPieceValue(Piece piece)
+    +performMove()
+}
+
+Piece -[hidden]-> Main
+Main -[hidden]-> ChessAI
+@enduml

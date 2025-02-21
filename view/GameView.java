@@ -55,7 +55,6 @@ public class GameView extends JFrame {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout());
 
-        // Кнопка отмены хода
         JButton undoButton = new JButton("Отменить ход");
         undoButton.addActionListener(e -> {
             board.undoMove();

@@ -1,0 +1,177 @@
+
+'https://plantuml.com/sequence-diagram
+
+@startuml
+
+'!define root_package .
+'
+'class Main {
+'    +main(String[] args) : void {static}
+'}
+'class Bishop {
+'    +canAttack(int x, int y, Board board)
+'    #getType()
+'}
+'Bishop --|> Piece
+'class Board {
+'    +equals(Object obj)
+'    +hashCode()
+'    +getCapturedPiece()
+'    -setupInitialPosition()
+'    +getPieceAt(int x, int y)
+'    +setPieceAt(int x, int y, Piece piece)
+'    +movePiece(int fromX, int fromY, int toX, int toY)
+'    +undoMove()
+'    +isKingInCheck(String color)
+'    +noValidMoves(String color)
+'    +checkGameEnd()
+'    +saveGameToNotationFile(String filePath)
+'    -convertMoveToNotation(Move move)
+'    -convertPositionToNotation(int x, int y)
+'    +loadGameFromNotationFile(String filePath)
+'    +applyMove(Move move)
+'    +parseNotationToMove(String notation)
+'    -isValidCoordinate(int x, int y)
+'    -isMoveValid(Move move)
+'    +clone()
+'    +getCurrentPlayerColor()
+'}
+'Board ..|> Cloneable
+'class ChessAI {
+'    +calculateBestMove(int depth)
+'    -minimax(int depth, boolean maximizingPlayer, int alpha, int beta)
+'    +evaluateBoard()
+'    -getPieceValue(Piece piece)
+'    +performMove()
+'}
+'class King {
+'    +canAttack(int x, int y, Board board)
+'    #getType()
+'}
+'King --|> Piece
+'class Knight {
+'    +canAttack(int x, int y, Board board)
+'    #getType()
+'}
+'Knight --|> Piece
+'class Pawn {
+'    +canAttack(int x, int y, Board board)
+'    #getType()
+'}
+'Pawn --|> Piece
+'class Piece {
+'    +setPosition(int newX, int newY)
+'    +isInBounds(int x, int y)
+'    +clone()
+'    +getColor()
+'    +pieceInfo()
+'}
+'Piece ..|> Cloneable
+'class Queen {
+'    #getType()
+'    +canAttack(int x, int y, Board board)
+'}
+'Queen --|> Piece
+'class Rook {
+'    #getType()
+'    +canAttack(int x, int y, Board board)
+'}
+'Rook --|> Piece
+
+@startuml
+class ChessBoardPanel {
+    -cells : JButton[][]
+    -highlightedCells : List<Point>
+
+    +updateBoard(Piece[][] board)
+    +highlightCells(List<Point> points)
+    +clearHighlights()
+}
+ChessBoardPanel --|> JPanel
+class GameView {
+    -againstComputer : boolean
+    -gameEnded : boolean
+    -board : Board
+    -boardPanel : ChessBoardPanel
+    -chessAI : ChessAI
+    -selectedX : int
+    -selectedY : int
+
+    -setupListeners()
+    -setupButtons()
+    -handleCellClick(int x, int y)
+    -performComputerMove()
+    -checkGameEnd()
+    -endGame()
+}
+GameView --|> JFrame
+class ImageLoader {
+    -imageCash : Map<String, ImageIcon> {final}
+    +getImage(String fileName) : ImageIcon {static}
+}
+class MainMenuView {
+    -startGame(boolean againstComputer)
+}
+MainMenuView --|> JFrame
+@enduml
+
+
+
+'class AllTests {
+'}
+'class BishopTest {
+'    +testIsPathClear_NoObstacles()
+'    +testIsPathClear_ObstacleInMiddle()
+'    +testIsPathClear_DestinationOccupied()
+'    +testIsPathClear_InvalidMove_NotDiagonal()
+'}
+'class BoardTest {
+'    +testGetValidMovesForPawnInitialPosition()
+'    +testGetValidMovesForBlockedPawn()
+'    +testGetValidMovesForRookUnblocked()
+'    +testGetValidMovesForKingInCheck()
+'    +testGetValidMovesForKnight()
+'    +testGetValidMovesForEmptySquare()
+'    +testGetValidMovesForOpponentPiece()
+'}
+'class KingTest {
+'    +testCanAttackAdjacentSquareOccupied()
+'    +testCanAttackAdjacentSquareEmpty()
+'    +testCannotAttackDistantSquare()
+'    +testCannotAttackSameSquare()
+'    +testCanAttackEdgeCase()
+'    +testCannotAttackOutOfBounds()
+'}
+'class KnightTest {
+'    +testKnightMovesFromCenter()
+'    +testKnightMovesFromCorner()
+'    +testKnightMovesWithAlliesBlocking()
+'    +testKnightMovesWithEnemyPieces()
+'    +testNoMovesWhenSurroundedByAllies()
+'}
+'class PawnTest {
+'    +testPawnMoveForwardOneStep()
+'    +testPawnMoveForwardOneStep()
+'    +testPawnMoveForwardOneStep()
+'    +testPawnMoveForwardTwoStepsFromStartingPosition()
+'    +testPawnCannotMoveForwardWhenBlocked()
+'    +testPawnMoveCaptureDiagonally()
+'    +testPawnMoveCaptureDiagonally()
+'    +testPawnCannotCaptureDiagonallySameColor()
+'    +testPawnCannotCaptureDiagonallySameColor()
+'    +testBlackPawnMoveForwardTwoStepsFromStartingPosition()
+'}
+'class QueenTest {
+'    +testGetPotentialMoves_EmptyBoard_CenterPosition()
+'    +testGetPotentialMoves_CaptureOpponentPiece()
+'    +testGetPotentialMoves_BlockedBySameColorPiece()
+'    +testGetPotentialMoves_EmptyBoard_CornerPosition()
+'    +testGetPotentialMoves_BlockedInAllDirections()
+'}
+'class RookTest {
+'    +testCanAttackHorizontalPathClear()
+'    +testCanAttackVerticalPathClear()
+'    +testCannotAttackDiagonal()
+'    +testCannotAttackBlockedPath()
+'}
+
